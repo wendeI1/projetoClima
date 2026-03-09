@@ -1,0 +1,15 @@
+# Ambientes Virtuais (NAO MEXER)
+.venv/
+venv/
+env/
+ENV/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+
+# Dependências de Front-end
+# coloca as coisas do front aq pra n subir arquivo inutil
+
+# Arquivos de IDE
+.vscode/
