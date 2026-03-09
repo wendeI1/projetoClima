@@ -1,0 +1,5 @@
+criem um requirements no proprio dir de vcs, 
+como tem no de back
+
+tomem cuidado e coloquem os itens privados no gitignore, pra nao 
+subir coisas que nao devem (como o .venv)

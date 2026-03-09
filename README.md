@@ -3,8 +3,6 @@ Porjeto de Itinerário Extensionanista
 
 por enquanto ta feio assim pra ja falar direto agr
 
-pro pessoal de front, criem um requirements no proprio dir de vcs, como tem no de back
-
 para os de back:
 - cd backend
 - criem o ambiente: py -m venv .venv (estejam na pasta certa q é a de back, pro git n subir todos os arquivos de python)
