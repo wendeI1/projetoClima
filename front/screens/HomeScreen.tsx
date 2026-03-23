@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 // API Key da OpenWeatherMap
-const API_KEY = "SUA_CHAVE_AQUI";
+const API_KEY = "CHAVE_AQUI";
 const CITY = "Mogi das Cruzes, SP";
 
 // Tipagem da API
