@@ -143,7 +143,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#0058bc",
-    paddingTop: 92, // já existente
+    paddingTop: 96, // já existente
     paddingBottom: 32, // aumentar para “descer” o conteúdo
     paddingHorizontal: 16,
     flexDirection: "row",
