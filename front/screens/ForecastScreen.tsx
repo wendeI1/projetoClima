@@ -1,63 +1,32 @@
 import { Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TextInput, View, ScrollView } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View, ScrollView } from "react-native";
+import { API_URL } from "../api";
 
-// API Key da OpenWeatherMap
-const API_KEY = "CHAVE_AQUI";
-const DEFAULT_CITY = "Florianópolis, SC";
-
-// Tipagem da API
-interface WeatherData {
-  main?: {
-    temp?: number;
-    temp_min?: number;
-    temp_max?: number;
-    humidity?: number;
-    feels_like?: number;
-  };
-  wind?: { speed?: number };
-  weather?: { main?: string; description?: string }[];
-  name?: string;
-}
-
-interface ForecastData {
-  dt_txt: string;
-  main: { temp: number; temp_min: number; temp_max: number };
-  weather: { main: string; description: string }[];
-}
+const DEFAULT_CITY = "Suzano";
 
 export default function ForecastScreen() {
-  const [city, setCity] = useState(DEFAULT_CITY);
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastData[]>([]);
+  const [weather, setWeather] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchWeather = async () => {
     setLoading(true);
     try {
-      const resWeather = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=pt_br`
-      );
-      const dataWeather: WeatherData = await resWeather.json();
-      setWeather(dataWeather);
-
-      const resForecast = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric&lang=pt_br`
-      );
-      const dataForecast = await resForecast.json();
-      const dailyForecast = dataForecast.list.filter((_: any, i: number) => i % 8 === 0);
-      setForecast(dailyForecast);
+      const res = await fetch(`${API_URL}/clima?cidade=${encodeURIComponent(DEFAULT_CITY)}`);
+      const data = await res.json();
+      setWeather(data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchWeather();
   }, []);
 
-  if (loading) {
+  if (loading || !weather) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#0058bc" />
@@ -65,28 +34,21 @@ export default function ForecastScreen() {
     );
   }
 
-  // Dados seguros
-  const temp = Math.round(weather?.main?.temp ?? 0);
-  const feelsLike = Math.round(weather?.main?.feels_like ?? 0);
-  const humidity = weather?.main?.humidity ?? 0;
-  const wind = Math.round((weather?.wind?.speed ?? 0) * 3.6);
-  const description = weather?.weather?.[0]?.description ?? "Sem dados";
-
+  const temp = Math.round(weather.temperatura ?? 0);
+  const feelsLike = Math.round(weather.sensacao ?? 0);
+  const humidity = weather.umidade ?? 0;
+  const wind = Math.round((weather.vento ?? 0) * 3.6);
+  const description = weather.clima_descricao ?? "Sem dados";
+  
   // Ícone clima
   const getIcon = (main: string | undefined) => {
     switch (main) {
-      case "Rain":
-        return "weather-rainy";
-      case "Clear":
-        return "weather-sunny";
-      case "Clouds":
-        return "weather-cloudy";
-      case "Thunderstorm":
-        return "weather-lightning";
-      case "Drizzle":
-        return "weather-partly-rainy";
-      default:
-        return "weather-partly-cloudy";
+      case "Rain": return "weather-rainy";
+      case "Clear": return "weather-sunny";
+      case "Clouds": return "weather-cloudy";
+      case "Thunderstorm": return "weather-lightning";
+      case "Drizzle": return "weather-partly-rainy";
+      default: return "weather-partly-cloudy";
     }
   };
 
@@ -96,38 +58,24 @@ export default function ForecastScreen() {
       <View style={styles.header}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <MaterialIcons name="pin-drop" size={24} color="#fff" />
-          <Text style={styles.headerText}>{city}</Text>
+          <Text style={styles.headerText}>{weather.cidade}</Text>
         </View>
         <View style={styles.airQuality}>
           <Text style={{ color: "#fff" }}>Ar: Bom</Text>
         </View>
       </View>
 
-      {/* Campo de pesquisa */}
-      <View style={styles.searchBar}>
-        <Feather name="search" size={20} color="#999" />
-        <TextInput
-          placeholder="Digite uma cidade..."
-          placeholderTextColor="#999"
-          style={styles.searchInput}
-          value={city}
-          onChangeText={setCity}
-        />
-        <Feather name="arrow-right-circle" size={20} color="#0058bc" onPress={fetchWeather} />
-      </View>
-
       {/* Hero Section */}
       <View style={styles.hero}>
         <MaterialCommunityIcons
-          name={getIcon(weather?.weather?.[0]?.main)} // <<< AQUI É WEATHER, NÃO DIA
+          name={getIcon(weather.clima_main) as any}
           size={64}
           color="#0058bc"
         />
         <Text style={styles.temperature}>{temp}°</Text>
-        <Text style={styles.weatherState}>{description}</Text>
-        <View style={styles.airQuality}>
-          <Text style={{ color: "#fff" }}>Qualidade do Ar: Bom</Text>
-        </View>
+        <Text style={[styles.weatherState, { textTransform: "capitalize" as const }]}>
+          {description}
+        </Text>
       </View>
 
       {/* Painel de detalhes */}
@@ -154,18 +102,18 @@ export default function ForecastScreen() {
         <Text style={{ fontWeight: "bold", fontSize: 18, color: "#0058bc", marginBottom: 8 }}>
           Previsão para os próximos dias
         </Text>
-        {forecast.map((dia, index) => (
+        {weather.previsao && weather.previsao.map((dia: any, index: number) => (
           <View key={index} style={styles.forecastCard}>
             <Text style={{ fontWeight: "bold" }}>
-              {new Date(dia.dt_txt).toLocaleDateString("pt-BR", { weekday: "long" })}
+              {new Date(dia.dt_txt).toLocaleDateString("pt-BR", { weekday: "short" })} - {new Date(dia.dt_txt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute:"2-digit" })}
             </Text>
             <MaterialCommunityIcons
-              name={getIcon(dia.weather[0].main)}
+              name={getIcon(dia.main_weather) as any}
               size={32}
               color="#0058bc"
             />
             <Text>
-              {Math.round(dia.main.temp_max)}° / {Math.round(dia.main.temp_min)}°
+              {Math.round(dia.temp_max)}° / {Math.round(dia.temp_min)}°
             </Text>
           </View>
         ))}
@@ -175,11 +123,11 @@ export default function ForecastScreen() {
       <View style={styles.rainCard}>
         <Text style={{ fontWeight: "bold", marginBottom: 8 }}>Probabilidade de Chuva</Text>
         <View style={styles.progressBarBackground}>
-          <View style={[styles.progressBarFill, { width: "5%" }]} />
+          <View style={[styles.progressBarFill, { width: `${weather.probabilidade_chuva}%` as import('react-native').DimensionValue }]} />
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
           <Text>0%</Text>
-          <Text>50%</Text>
+          <Text>{weather.probabilidade_chuva}%</Text>
           <Text>100%</Text>
         </View>
       </View>
@@ -190,7 +138,7 @@ export default function ForecastScreen() {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#0058bc",
-    paddingTop: 96,
+    paddingTop: 80,
     paddingBottom: 32,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 20,
@@ -204,22 +152,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     position: "absolute",
     right: 16,
-    top: 90,
+    top: 75,
   },
-  searchBar: {
-    backgroundColor: "#e0e0e0",
-    marginHorizontal: 16,
-    marginTop: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  searchInput: { flex: 1, marginLeft: 8, height: 36 },
   hero: { alignItems: "center", marginVertical: 16 },
   temperature: { fontSize: 48, fontWeight: "bold", marginVertical: 8 },
-  weatherState: { fontSize: 18, color: "#555", textTransform: "capitalize" },
+  weatherState: { fontSize: 18, color: "#555" },
   detailsPanel: { marginHorizontal: 16 },
   cardFull: {
     backgroundColor: "#fff",

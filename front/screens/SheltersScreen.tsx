@@ -1,95 +1,82 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Linking,
+  Platform,
+  ActivityIndicator
 } from "react-native";
+import { API_URL } from "../api";
 
 const LOCAL = "Locais seguros";
+const DEFAULT_CITY = "Suzano";
 
-// TIPOS
 type Local = {
   nome: string;
-  endereco: string;
-  tipo: string;
-  distance?: string;
-  people?: number;
+  lat: number;
+  lon: number;
 };
 
 type CardProps = {
   title: string;
-  type: string;
-  address: string;
-  distance?: string;
-  people?: number;
+  lat: number;
+  lon: number;
 };
 
-// CARD (SEM BOLINHA)
-const Card = ({ title, type, address, distance, people }: CardProps) => (
-  <View style={styles.card}>
-    <View style={styles.row}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.type}>{type}</Text>
-        <Text style={styles.info}>📍 {address}</Text>
+const Card = ({ title, lat, lon }: CardProps) => {
+  const openMaps = () => {
+    const scheme = Platform.select({ ios: 'maps://0,0?q=', android: 'geo:0,0?q=' });
+    const latLng = `${lat},${lon}`;
+    const label = title;
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`
+    });
 
-        {distance && people && (
-          <Text style={styles.info}>
-            📏 {distance} 👥 {people}
-          </Text>
-        )}
+    if (url) Linking.openURL(url);
+  };
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.type}>Abrigo Público</Text>
+          <Text style={styles.info}>📍 Coordenadas: {lat.toFixed(4)}, {lon.toFixed(4)}</Text>
+        </View>
+      </View>
+
+      <View style={styles.buttons}>
+        <TouchableOpacity style={styles.primaryBtn} onPress={openMaps}>
+          <Text style={styles.primaryText}>Traçar Rota no Mapa</Text>
+        </TouchableOpacity>
       </View>
     </View>
+  );
+};
 
-    <View style={styles.buttons}>
-      <TouchableOpacity style={styles.primaryBtn}>
-        <Text style={styles.primaryText}>Como chegar</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.secondaryBtn}>
-        <Text style={styles.secondaryText}>Ligar</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
-
-// APP
-export default function App() {
+export default function SheltersScreen() {
   const [locais, setLocais] = useState<Local[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const dados: Local[] =
-    locais.length > 0
-      ? locais
-      : [
-          {
-            nome: "Mogi Shopping",
-            endereco: "Av. Vereador Narciso Yague Guimarães, 1001",
-            tipo: "Sugestão",
-          },
-          {
-            nome: "Albergue Noturno",
-            endereco: "Rua Padre João, 330 - Centro",
-            tipo: "Sugestão",
-          },
-          {
-            nome: "Ginásio Municipal de Esportes",
-            endereco: "Rua Guilherme Martind de Souza, 150",
-            tipo: "Sugestão",
-          },
-          {
-            nome: "Centro Cultural de Mogi das Cruzes",
-            endereco: "Praça Monsehor Roque Pinto Barros, 360",
-            tipo: "Sugestão",
-          },
-          {
-            nome: "Praça da Prefeitura",
-            endereco: "Praça Sacadura Cabral, 1",
-            tipo: "Sugestão",
-          },
-        ];
+  useEffect(() => {
+    const fetchAbrigos = async () => {
+      try {
+        const res = await fetch(`${API_URL}/abrigos?cidade=${DEFAULT_CITY}`);
+        const data = await res.json();
+        setLocais(data.abrigos || []);
+      } catch (err) {
+        console.log("Erro ao buscar abrigos", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAbrigos();
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -106,22 +93,28 @@ export default function App() {
         </View>
 
         <Text style={styles.subtituloHeader}>
-          Abrigos próximos à sua localização
+          Abrigos em destaque ({DEFAULT_CITY})
         </Text>
       </View>
 
       {/* CONTEÚDO */}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {dados.map((item, index) => (
-          <Card
-            key={index}
-            title={item.nome}
-            type={item.tipo}
-            address={item.endereco}
-            distance={item.distance}
-            people={item.people}
-          />
-        ))}
+        {loading ? (
+          <ActivityIndicator size="large" color="#0058bc" style={{marginTop: 20}} />
+        ) : (
+          locais.length > 0 ? (
+            locais.map((item, index) => (
+              <Card
+                key={index}
+                title={item.nome}
+                lat={item.lat}
+                lon={item.lon}
+              />
+            ))
+          ) : (
+            <Text style={{textAlign: "center", marginTop: 20}}>Nenhum abrigo mockado para esta cidade.</Text>
+          )
+        )}
 
         {/* ALERTA */}
         <View style={styles.alertBox}>
@@ -133,12 +126,16 @@ export default function App() {
 
           <View style={styles.alertItem}>
             <Text style={styles.alertItemText}>Defesa Civil</Text>
-            <Text style={styles.alertItemNumber}>199</Text>
+            <TouchableOpacity onPress={() => Linking.openURL('tel:199')}>
+              <Text style={styles.alertItemNumber}>199</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.alertItem}>
             <Text style={styles.alertItemText}>Bombeiros</Text>
-            <Text style={styles.alertItemNumber}>193</Text>
+            <TouchableOpacity onPress={() => Linking.openURL('tel:193')}>
+              <Text style={styles.alertItemNumber}>193</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -146,12 +143,11 @@ export default function App() {
   );
 }
 
-// ESTILOS (removi o style.icon)
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#0058bc",
-    paddingTop: 61, // já existente
-    paddingBottom: 32, // aumentar para “descer” o conteúdo
+    paddingTop: 61,
+    paddingBottom: 32,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -163,7 +159,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 8,
   },
-
   subtituloHeader: {
     color: "#E0E0E0",
     fontSize: 14,
@@ -211,21 +206,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     alignItems: "center",
-    marginRight: 8,
   },
   primaryText: {
     color: "#FFF",
     fontWeight: "600",
-  },
-  secondaryBtn: {
-    backgroundColor: "#E5ECFF",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  secondaryText: {
-    color: "#2F6BFF",
-    fontWeight: "500",
   },
   alertBox: {
     backgroundColor: "#FFECEC",
