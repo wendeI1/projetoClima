@@ -11,7 +11,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/clima")
+@app.get("/cidades")
+def rota_cidades(q: str = ""):
+    return {"cidades": logic.buscar_cidades(q)}
 
-def rota_clima(lat: float, lon: float):
-    return logic.pegar_clima(lat, lon)
+@app.get("/clima")
+def rota_clima(cidade: str):
+    return logic.pegar_clima_cidade(cidade)
+
+@app.get("/abrigos")
+def rota_abrigos(cidade: str):
+    return {"abrigos": logic.buscar_abrigos(cidade)}
