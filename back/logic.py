@@ -38,15 +38,23 @@ def buscar_cidades(query: str):
     query_lower = query.lower()
     return [c for c in CIDADES_ALTO_TIETE if query_lower in c.lower()]
 
-def pegar_clima_cidade(cidade: str):
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade},SP,BR&appid={API_KEY}&units=metric&lang=pt_br"
+def pegar_clima_cidade(cidade: str = None, lat: float = None, lon: float = None):
+    if lat is not None and lon is not None:
+        url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric&lang=pt_br"
+    elif cidade is not None:
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade},SP,BR&appid={API_KEY}&units=metric&lang=pt_br"
+    else:
+        return {"erro": "Informe a cidade ou as coordenadas (lat e lon)."}
     response = requests.get(url)
     if response.status_code != 200:
         return {"erro": "Não foi possível obter dados do clima.", "status": response.status_code}
     
     data = response.json()
     
-    url_forecast = f"https://api.openweathermap.org/data/2.5/forecast?q={cidade},SP,BR&appid={API_KEY}&units=metric&lang=pt_br"
+    if lat is not None and lon is not None:
+        url_forecast = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API_KEY}&units=metric&lang=pt_br"
+    else:
+        url_forecast = f"https://api.openweathermap.org/data/2.5/forecast?q={cidade},SP,BR&appid={API_KEY}&units=metric&lang=pt_br"
     res_forecast = requests.get(url_forecast)
     
     pop = 0
@@ -77,7 +85,7 @@ def pegar_clima_cidade(cidade: str):
     alerta = calcular_alerta(chuva_3h, pop)
 
     return {
-        "cidade": data.get("name", cidade),
+        "cidade": data.get("name", cidade if cidade else "Localização Atual"),
         "temperatura": data["main"]["temp"],
         "sensacao": data["main"]["feels_like"],
         "umidade": data["main"]["humidity"],

@@ -16,8 +16,8 @@ def rota_cidades(q: str = ""):
     return {"cidades": logic.buscar_cidades(q)}
 
 @app.get("/clima")
-def rota_clima(cidade: str):
-    return logic.pegar_clima_cidade(cidade)
+def rota_clima(cidade: str = None, lat: float = None, lon: float = None):
+    return logic.pegar_clima_cidade(cidade, lat, lon)
 
 @app.get("/abrigos")
 def rota_abrigos(cidade: str):
