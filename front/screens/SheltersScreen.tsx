@@ -1,3 +1,4 @@
+import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -64,18 +65,40 @@ export default function SheltersScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAbrigos = async () => {
+
+    const carregarDados = async () => {
       try {
-        const res = await fetch(`${API_URL}/abrigos?cidade=${DEFAULT_CITY}`);
+        // permisão de acesso 
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") {
+          console.log("Permissão negada");
+          setLoading(false);
+          return;
+        }
+
+        // pegar a localização
+        const current = await Location.getCurrentPositionAsync({});
+
+        const latitude = current.coords.latitude;
+        const longitude = current.coords.longitude;
+
+        const res = await fetch(
+          `${API_URL}/abrigos?lat=${latitude}&lon=${longitude}`
+        );
+
         const data = await res.json();
+
         setLocais(data.abrigos || []);
+
       } catch (err) {
-        console.log("Erro ao buscar abrigos", err);
+        console.log("Erro geral:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchAbrigos();
+
+    carregarDados();
   }, []);
 
   return (
