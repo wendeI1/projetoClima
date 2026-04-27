@@ -2,7 +2,7 @@
 
 > **App de auxílio a comunidades em áreas vulneráveis e com alto risco de alagamento.**
 
-Este projeto faz parte do **Itinerário Extensionista** da faculdade Braz Cubas e tem como objetivo principal fornecer uma ferramenta acessível e rápida para monitorar o clima e alertar moradores de regiões de risco (com foco inicial na região do Alto Tietê) sobre possíveis enchentes e alagamentos, além da função de previsão do tempo.
+Este projeto faz parte do **Itinerário Extensionista** da faculdade Braz Cubas e tem como objetivo principal fornecer uma ferramenta acessível e rápida para monitorar o clima e alertar moradores de regiões de risco (com foco inicial na região do Alto Tietê) sobre possíveis enchentes e alagamentos, alem da função de previsão do tempo.
 
 ---
 
