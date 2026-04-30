@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Image,
-  StyleSheet,
-} from "react-native";
-
+import React, { useEffect } from "react";
+import { View, Image, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
 
-import TabNavigator from "../navigation/TabNavigator";
+type Props = {
+  navigation: any;
+};
 
-export default function Page() {
-  const [showApp, setShowApp] = useState(false);
-
+export default function SplashScreen({ navigation }: Props) {
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.8);
 
@@ -29,7 +24,7 @@ export default function Page() {
     });
 
     const timer = setTimeout(() => {
-      setShowApp(true);
+      navigation.replace("Home");
     }, 2500);
 
     return () => clearTimeout(timer);
@@ -42,20 +37,16 @@ export default function Page() {
     };
   });
 
-  if (!showApp) {
-    return (
-      <View style={styles.container}>
-        <Animated.View style={animatedStyle}>
-          <Image
-            source={require("../assets/images/logo-semFundo.png")}
-            style={styles.logo}
-          />
-        </Animated.View>
-      </View>
-    );
-  }
-
-  return <TabNavigator />;
+  return (
+    <View style={styles.container}>
+      <Animated.View style={animatedStyle}>
+        <Image
+          source={require("../../assets/logo-semFundo.png")}
+          style={styles.logo}
+        />
+      </Animated.View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

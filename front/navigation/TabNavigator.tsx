@@ -9,6 +9,7 @@ import HomeScreen from "../screens/HomeScreen";
 import SheltersScreen from "../screens/SheltersScreen";
 import SupportScreen from "../screens/SupportScreen";
 import TipsScreen from "../screens/TipsScreen";
+import SplashScreen from "../screens/SplashScreen";
 
 const Tab = createBottomTabNavigator();
 
