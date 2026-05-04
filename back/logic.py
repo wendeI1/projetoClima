@@ -3,7 +3,7 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-API_KEY = os.getenv("OPENWEATHER_API_KEY", "chave_mock")
+API_KEY = os.getenv("fa8d45e48c181d35a2fcf5e7bc2ecf2c", "chave_mock")
 
 CIDADES_ALTO_TIETE = [
     "Arujá", "Biritiba Mirim", "Ferraz de Vasconcelos", "Guararema", 
