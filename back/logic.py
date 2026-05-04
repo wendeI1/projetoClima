@@ -8,7 +8,7 @@ API_KEY = os.getenv("OPENWEATHER_API_KEY", "chave_mock")
 CIDADES_ALTO_TIETE = [
     "Arujá", "Biritiba Mirim", "Ferraz de Vasconcelos", "Guararema", 
     "Guarulhos", "Itaquaquecetuba", "Mogi das Cruzes", "Poá", 
-    "Salesópolis", "Santa Isabel", "Suzano", "Teste legal"
+    "Salesópolis", "Santa Isabel", "Suzano", "Teste legaaal"
 ]
 
 ABRIGOS_MOCK = {
