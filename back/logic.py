@@ -8,7 +8,7 @@ API_KEY = os.getenv("OPENWEATHER_API_KEY", "chave_mock")
 CIDADES_ALTO_TIETE = [
     "Arujá", "Biritiba Mirim", "Ferraz de Vasconcelos", "Guararema", 
     "Guarulhos", "Itaquaquecetuba", "Mogi das Cruzes", "Poá", 
-    "Salesópolis", "Santa Isabel", "Suzano", "Teste legaaal"
+    "Salesópolis", "Santa Isabel", "Suzano"
 ]
 
 ABRIGOS_MOCK = {
@@ -40,7 +40,7 @@ def buscar_cidades(query: str):
 
 def pegar_clima_cidade(cidade: str = None, lat: float = None, lon: float = None):
     if lat is not None and lon is not None:
-        url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={fa8d45e48c181d35a2fcf5e7bc2ecf2c}&units=metric&lang=pt_br}&units=metric&lang=pt_br"
+        url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric&lang=pt_br"
     elif cidade is not None:
         url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade},SP,BR&appid={API_KEY}&units=metric&lang=pt_br"
     else:
